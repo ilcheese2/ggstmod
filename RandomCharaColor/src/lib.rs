@@ -1,13 +1,4 @@
-mod cxxstd;
-mod output;
-mod red;
-mod ue4ss;
-mod memory;
-
-use crate::cxxstd::{CxxString, CxxStringView};
-use crate::memory::signature_scan;
-use crate::red::{ECharID, EColorID, Header, Packet_BattleReady};
-use crate::ue4ss::{CppUserModBase, FMalloc, FString, Vtable, CONFIG_PATH};
+use gglibrary::cxxstd::{CxxString, CxxStringView};
 use rand::seq::IndexedRandom;
 use crate::ConfigError::NoneError;
 use enum_map::{Enum, EnumMap};
@@ -28,7 +19,10 @@ use libc::memcpy;
 use strum::{IntoEnumIterator, ParseError};
 use toml::{de, Table};
 use widestring::U16CString;
-use crate::output::{budget_log, clear_log};
+use gglibrary::memory::signature_scan;
+use gglibrary::output::{budget_log, clear_log};
+use gglibrary::red::{ECharID, EColorID, Packet_BattleReady};
+use gglibrary::ue4ss::{CppUserModBase, FMalloc, FString};
 
 #[derive(Debug)]
 enum ConfigError {
@@ -114,7 +108,7 @@ type fn_UREDWidgetSimpleCharaSelect_OnInputPressTrigger = unsafe extern "C" fn(*
 
 type fn_IsSelectableCharaColorID = unsafe extern "C" fn(ECharID, EColorID) -> bool;
 type fn_SendBattleReady = unsafe extern "C" fn(bool) -> bool;
-type fn_SendPacket = unsafe extern "C" fn(u32, *mut Header, *mut c_void) -> bool;
+type fn_SendPacket = unsafe extern "C" fn(u32, *mut gglibrary::red::Header, *mut c_void) -> bool;
 type fn_Seq_GotoBattle = unsafe extern "C" fn(*mut c_void, bool);
 type fn_ColorIdToDisplayNumber = unsafe extern "C" fn(*mut FString, EColorID) -> *mut FString;
 type fn_IsAllowedCharaColorID = unsafe extern "C" fn(ECharID, EColorID) -> bool;
@@ -252,7 +246,7 @@ pub unsafe extern "C" fn send_battle_ready(battle_ready: bool) -> bool {
     (hooks.SendBattleReady.orig)(battle_ready)
 }
 
-pub unsafe extern "C" fn send_packet(socket_type: u32, header: *mut Header, peer_handle: *mut c_void) -> bool {
+pub unsafe extern "C" fn send_packet(socket_type: u32, header: *mut gglibrary::red::Header, peer_handle: *mut c_void) -> bool {
     let hooks = HOOKS.get().unwrap();
     if (*header).packet_type == 0x32 {
         let battle_ready: *mut Packet_BattleReady = std::mem::transmute(header);
@@ -382,7 +376,7 @@ pub unsafe extern "C" fn render_tab(this: *mut CppUserModBase<Data>) {
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn start_mod() -> *mut CppUserModBase<Data> {
     clear_log();
-    let vtable = Box::new(Vtable {
+    let vtable = Box::new(gglibrary::ue4ss::Vtable {
         destructor,
         on_update,
         on_unreal_init,

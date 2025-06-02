@@ -157,7 +157,7 @@ struct AREDGameState_CharaSelect {
 #[derive(Debug)]
 pub struct Header {
     size: u16,
-    pub(crate) packet_type: u16, // SessionPacketID
+    pub packet_type: u16, // SessionPacketID
 }
 
 #[repr(C)]

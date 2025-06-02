@@ -1,3 +1,4 @@
 /target
 build.sh
-Cross.toml
+RandomCharaColor/Cross.toml
+budget.log

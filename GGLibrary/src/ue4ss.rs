@@ -11,7 +11,7 @@ use winapi::um::processthreadsapi::GetCurrentProcess;
 use winapi::um::psapi::{GetModuleInformation, MODULEINFO};
 use winapi::um::errhandlingapi::GetLastError;
 use winapi::shared::minwindef::{FARPROC, HINSTANCE, HINSTANCE__};
-use crate::budget_log;
+use crate::output::budget_log;
 use crate::memory::ThreadSafePtr;
 
 #[repr(C)]
@@ -108,14 +108,14 @@ pub struct Vtable<T> {
 
 #[repr(C)]
 pub struct CppUserModBase<T> {
-    pub(crate) vtable: *const Vtable<T>,
-    pub(crate) padding: [u8; 0x18], //std::vector<std::shared_ptr<GUI::GUITab>> GUITabs{}
-    pub(crate) mod_name: CxxString,
-    pub(crate) mod_version: CxxString,
-    pub(crate) mod_description: CxxString,
-    pub(crate) mod_authors: CxxString,
-    pub(crate) mod_intended_sdk_version: CxxString,
-    pub(crate) data: T
+    pub vtable: *const Vtable<T>,
+    pub padding: [u8; 0x18], //std::vector<std::shared_ptr<GUI::GUITab>> GUITabs{}
+    pub mod_name: CxxString,
+    pub mod_version: CxxString,
+    pub mod_description: CxxString,
+    pub mod_authors: CxxString,
+    pub mod_intended_sdk_version: CxxString,
+    pub data: T
 }
 
 impl<T> Drop for CppUserModBase<T> {

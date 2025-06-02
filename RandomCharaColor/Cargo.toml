@@ -1,5 +1,5 @@
 [package]
-name = "ggstmod"
+name = "random_chara_color"
 version = "0.1.0"
 edition = "2024"
 
@@ -11,12 +11,13 @@ crate-type = ["dylib"]
 libc = "0.2.172"
 widestring = "1.2.0"
 winapi = { version = "0.3.9", features = ["libloaderapi", "psapi", "processthreadsapi", "minwindef", "errhandlingapi"]}
-minhook = { version = "0.7.1"}
 strum  = { version = "0.27.1", features = ["derive"]}
+minhook = "0.7.1"
 enum-map = { version = "2.7.3", features = ["serde"] }
 toml = "0.8.22"
 serde = { version = "1.0.219", features = ["derive"] }
 hex = "0.4.3"
 rand = "0.9.1"
+gglibrary = { path = "../GGLibrary" }
 
 
