@@ -70,10 +70,8 @@ dependencies = [
  "hex",
  "libc",
  "minhook",
- "rand",
  "serde",
  "strum",
- "toml",
  "widestring",
  "winapi",
 ]
