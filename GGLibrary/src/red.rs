@@ -1,13 +1,25 @@
+use enum_map::Enum;
+use serde::de::{Error, Visitor};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt::Formatter;
 use std::ops::Deref;
-use enum_map::Enum;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use serde::de::{Error, Visitor};
 use strum::{Display, EnumIter, EnumString, FromRepr};
 
-#[derive(Debug, PartialEq, Display, Enum, EnumString, EnumIter, FromRepr, Clone, Copy, Serialize, Deserialize)]
+#[derive(
+    Debug,
+    PartialEq,
+    Display,
+    Enum,
+    EnumString,
+    EnumIter,
+    FromRepr,
+    Clone,
+    Copy,
+    Serialize,
+    Deserialize,
+)]
 #[repr(u32)]
-pub enum ECharID {
+pub enum ECharaID {
     SOL,
     KYK,
     MAY,
@@ -90,6 +102,9 @@ pub enum SessionPacketID {
     EasyAntiCheat,
 }
 
+pub type ECostumeID = i32;
+pub type EBattleCharaSpFlag = bool;
+
 #[repr(C)]
 #[derive(PartialEq, Clone, Copy, Debug)]
 pub struct EColorID(pub u32);
@@ -105,7 +120,7 @@ impl Deref for EColorID {
 impl Serialize for EColorID {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: Serializer
+        S: Serializer,
     {
         serializer.serialize_u32(self.0 + 1)
     }
@@ -126,31 +141,30 @@ impl<'de> Deserialize<'de> for EColorID {
 }
 
 #[repr(C)]
-struct SDecideInfo {
-    chara_id: ECharID,
-    color_id: EColorID,
+pub struct SDecideInfo {
+    pub chara_id: ECharaID,
+    pub color_id: EColorID,
     costume_id: u32,
     script_id: u32,
-    battle_script: u32,
-    battle_state: u32,
+    stage_id: u32,
     bgm_id: u32,
-    something_flag: u32,
+    sp_flag: u32,
     skill_set: u32,
 }
 
 #[repr(C)]
-struct SSideInfo {
+pub struct SSideInfo {
     side_id: u32,
     pad_id: u32,
-    decide_info: SDecideInfo, // de(s)ide
+    pub decide_info: SDecideInfo, // de(s)ide
     cpu: u32,
     page: i32,
 }
 
 #[repr(C)]
-struct AREDGameState_CharaSelect {
+pub struct AREDGameState_CharaSelect {
     padding: [u8; 0xe68],
-    side_info: [SSideInfo; 2],
+    pub side_info: [SSideInfo; 2],
 }
 
 #[repr(C)]
@@ -170,4 +184,14 @@ pub struct Packet_BattleReady {
     bgm: i16,
     dan: [i8; 3],
     costume: [i8; 3],
+}
+
+pub type EBGMID = i32;
+
+// AREDGameState_CharaSelect::SDecideInfoHistory
+#[repr(C)]
+pub struct SDecideInfoHistory {
+    pub chara_history: [SDecideInfo; 2],
+    pub is_valid: bool,
+    main_side: u32,
 }

@@ -35,13 +35,15 @@ use std::io::Write;
 use std::path::Path;
 
 pub fn budget_log(s: &str) {
-    #[cfg(debug_assertions)] {}
-        let mut f = OpenOptions::new()
-            .append(true)
-            .create(true)
-            .open(env!("CARGO_MANIFEST_DIR").to_owned() + "/budget.log").unwrap();
-        f.write((s.to_string() + "\n").as_bytes()).unwrap();
-   // }
+    #[cfg(debug_assertions)]
+    {}
+    let mut f = OpenOptions::new()
+        .append(true)
+        .create(true)
+        .open(env!("CARGO_MANIFEST_DIR").to_owned() + "/budget.log")
+        .unwrap();
+    f.write((s.to_string() + "\n").as_bytes()).unwrap();
+    // }
 }
 
 pub fn clear_log() {
@@ -49,7 +51,8 @@ pub fn clear_log() {
     let mut f = OpenOptions::new()
         .write(true)
         .create(true)
-        .open(env!("CARGO_MANIFEST_DIR").to_owned() + "/budget.log").unwrap();
+        .open(env!("CARGO_MANIFEST_DIR").to_owned() + "/budget.log")
+        .unwrap();
 
     f.set_len(0).unwrap();
 }

@@ -1,8 +1,8 @@
+use crate::output::budget_log;
+use libc::{free, malloc, memcpy, memset};
 use std::fmt;
 use std::ops::Deref;
-use libc::{free, malloc, memcpy, memset};
 use widestring::U16String;
-use crate::output::budget_log;
 
 const BUF_SIZE: usize = 16;
 const SMALL_STRING_SIZE: usize = (BUF_SIZE - 1) / size_of::<u16>(); // 7
@@ -15,24 +15,29 @@ pub union SmallString {
 
 impl fmt::Debug for SmallString {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        unsafe {f.debug_struct("SmallString")
-            .field("large", &self.large)
-            .finish()}
+        unsafe {
+            f.debug_struct("SmallString")
+                .field("large", &self.large)
+                .finish()
+        }
     }
 }
 
 #[repr(C)]
 #[derive(Debug)]
-pub struct CxxString { // wstring
+pub struct CxxString { // TODO: provide u8 support
+    // wstring
     pub data: SmallString,
     length: usize, // number of characters
-    capacity: usize
+    capacity: usize,
 }
 
 impl CxxString {
     pub fn new() -> Self {
         Self {
-            data: SmallString { small: [0; BUF_SIZE] },
+            data: SmallString {
+                small: [0; BUF_SIZE],
+            },
             length: 0,
             capacity: SMALL_STRING_SIZE,
         }
@@ -45,7 +50,11 @@ impl CxxString {
         string.length = wstring.len();
         string.capacity = wstring.len();
         if string.length <= SMALL_STRING_SIZE {
-            std::ptr::copy_nonoverlapping::<u8>(wstring.as_ptr().cast(), string.data.small.as_mut_ptr(), nbytes - 1);
+            std::ptr::copy_nonoverlapping::<u8>(
+                wstring.as_ptr().cast(),
+                string.data.small.as_mut_ptr(),
+                nbytes - 1,
+            );
         } else {
             let ptr = malloc(nbytes); // msvc new uses malloc so...
             memset(ptr, 0, nbytes); // set null terminator
@@ -57,11 +66,15 @@ impl CxxString {
 
     pub fn string(&self) -> String {
         if self.length <= SMALL_STRING_SIZE {
-            unsafe { U16String::from_ptr(self.data.small.as_ptr().cast(), self.length) }.to_string().unwrap()
+            unsafe { U16String::from_ptr(self.data.small.as_ptr().cast(), self.length) }
+                .to_string()
+                .unwrap()
         } else {
             budget_log(format!("string: {}", self.length).as_str());
             unsafe { budget_log(format!("string: {:p}", self.data.large).as_str()) };
-            unsafe { U16String::from_ptr(self.data.large.cast(), self.length) }.to_string().unwrap()
+            unsafe { U16String::from_ptr(self.data.large.cast(), self.length) }
+                .to_string()
+                .unwrap()
         }
     }
 }
@@ -69,14 +82,14 @@ impl CxxString {
 impl Drop for CxxString {
     fn drop(&mut self) {
         if self.length > SMALL_STRING_SIZE {
-            unsafe {free(self.data.large.cast()) };
+            unsafe { free(self.data.large.cast()) };
         }
     }
 }
 
 pub struct CxxVector<T> {
     first: *const T,
-    last : *const T,
+    last: *const T,
     end: *const T,
 }
 
@@ -91,7 +104,10 @@ impl<'a, T> IntoIterator for &'a CxxVector<T> {
     type IntoIter = std::slice::Iter<'a, T>;
 
     fn into_iter(self) -> Self::IntoIter {
-        unsafe { std::slice::from_raw_parts(self.first, self.last.offset_from(self.first) as usize).iter() }
+        unsafe {
+            std::slice::from_raw_parts(self.first, self.last.offset_from(self.first) as usize)
+                .iter()
+        }
     }
 }
 
@@ -115,7 +131,6 @@ pub struct CxxStringView {
 }
 
 impl CxxStringView {
-
     pub unsafe fn from_str(s: &str) -> Self {
         let mut string = Self {
             data: std::ptr::null_mut(),
@@ -139,7 +154,7 @@ impl CxxStringView {
 impl Drop for CxxStringView {
     fn drop(&mut self) {
         if self.length > BUF_SIZE {
-            unsafe {free(self.data.cast()) };
+            unsafe { free(self.data.cast()) };
         }
     }
 }
