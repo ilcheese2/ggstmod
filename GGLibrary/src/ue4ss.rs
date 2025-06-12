@@ -154,25 +154,6 @@ pub struct Vtable<T> {
     pub padding: [u8; 0x8], // idk
 }
 
-// impl<T> Default for Vtable<T> {
-//     fn default() -> Self {
-//         Vtable {
-//             destructor: ,
-//             on_update: Self::default_on_update,
-//             on_unreal_init: Self::default_on_unreal_init,
-//             on_ui_init: Self::default_on_ui_init,
-//             on_program_start: Self::default_on_program_start,
-//             on_lua_start: Self::default_on_lua_start,
-//             on_lua_start2: Self::default_on_lua_start2,
-//             on_lua_stop: Self::default_on_lua_stop,
-//             on_lua_stop2: Self::default_on_lua_stop2,
-//             on_dll_load: Self::default_on_dll_load,
-//             render_tab: Self::default_render_tab,
-//             padding: [0; 8],
-//         }
-//     }
-// }
-
 #[repr(C)]
 pub struct CppUserModBase<T> {
     pub vtable: *const Vtable<T>,

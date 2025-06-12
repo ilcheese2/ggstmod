@@ -366,11 +366,11 @@ pub unsafe extern "C" fn start_mod() -> *mut CppUserModBase<Data> {
         Box::into_raw(Box::new(CppUserModBase {
             vtable: Box::into_raw(vtable),
             padding: [0; 0x18],
-            mod_name: CxxString::from_str("Ran"),
+            mod_name: CxxString::from_str("Random Chara Color"),
             mod_version: CxxString::from_str("1"),
-            mod_description: CxxString::from_str("l"),
-            mod_authors: CxxString::from_str("ilc"),
-            mod_intended_sdk_version: CxxString::from_str("k"),
+            mod_description: CxxString::from_str(""),
+            mod_authors: CxxString::from_str("ilcheese2"),
+            mod_intended_sdk_version: CxxString::from_str(""),
             data: Default::default()
         }))
     }
