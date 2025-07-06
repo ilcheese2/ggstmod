@@ -9,9 +9,9 @@ crate-type = ["lib"]
 [dependencies]
 serde = { version = "1.0.219", features = ["derive"] }
 libc = "0.2.172"
-strum = "0.27.1"
+strum  = { version = "0.27.1", features = ["derive"]}
 widestring = "1.2.0"
 minhook = "0.7.1"
 enum-map = { version = "2.7.3", features = ["serde"] }
 hex = "0.4.3"
-winapi = "0.3.9"
+winapi = { version = "0.3.9", features = ["processthreadsapi", "psapi", "errhandlingapi", "minwindef", "libloaderapi"] }

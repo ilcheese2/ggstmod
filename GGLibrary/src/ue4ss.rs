@@ -1,7 +1,7 @@
 use crate::cxxstd::{CxxString, CxxStringView};
 use crate::memory::ThreadSafePtr;
 use crate::output::budget_log;
-use libc::exit;
+use libc::{exit, memcpy};
 use std::cell::LazyCell;
 use std::ffi::c_void;
 use std::ops::Deref;
@@ -28,6 +28,8 @@ pub struct FString {
 }
 
 type fn_FMemory_Malloc = unsafe extern "C" fn(u64, u32) -> *mut c_void;
+pub type fn_FName_cstr = unsafe extern "C" fn(*mut c_void, *mut c_void, u32, *mut c_void);
+pub type fn_FName_ToString = unsafe extern "C" fn(*mut FName, *mut FString);
 
 pub struct ModCallback<T>(pub unsafe extern "C" fn(*mut CppUserModBase<T>));
 unsafe extern "C" fn default_mod_callback<T>(_: *mut CppUserModBase<T>) {}
@@ -137,6 +139,51 @@ pub static FMalloc: LazyLock<fn_FMemory_Malloc> = LazyLock::new(|| {
     }
     unsafe { std::mem::transmute::<FARPROC, fn_FMemory_Malloc>(addr) }
 });
+
+static FName: LazyLock<fn_FName_cstr> = LazyLock::new(|| {
+    let addr = unsafe {
+        GetProcAddress(
+            **UE4SS,
+            (b"??0FName@Unreal@RC@@QEAA@PEB_WW4EFindName@12@PEAX@Z\0")
+                .as_ptr()
+                .cast(),
+        )
+    };
+    if addr.is_null() {
+        budget_log("failed to get fname construct with string");
+    }
+    unsafe { std::mem::transmute::<FARPROC, fn_FName_cstr>(addr) }
+});
+
+// FNAME_Add
+pub unsafe fn create_fstring(string: &str) -> *mut FString {
+    let ptr = (*FMalloc)((2 * string.len() + 1) as u64, 0);
+    unsafe { memcpy(ptr, U16CString::from_str(string).unwrap().as_mut_ptr().cast(), 2 * (string.len() + 1)); }
+    let fstring: *mut FString = (*FMalloc)(size_of::<FString>() as u64, 0).cast();
+    (*fstring).data = ptr.cast();
+    (*fstring).size = (string.len() + 1) as u32;
+    (*fstring).capacity = align_to(string.len() + 1, 4) as u32; // idk if align is required
+    fstring
+}
+
+pub unsafe fn fstring_to_string(fstring: &FString) -> String {
+    let size = fstring.size as usize;
+    if size == 0 {
+        return String::new();
+    }
+    let data = (*fstring).data.cast::<u16>();
+    U16String::from_ptr(data, size - 1).to_string().unwrap()
+}
+
+pub fn align_to(size: usize, alignment: usize) -> usize {
+    if size % alignment == 0 {
+        size
+    } else {
+        size + (alignment - (size % alignment))
+    }
+}
+
+pub type FName = u64;
 
 #[derive(Default)]
 pub struct Vtable<T> {
