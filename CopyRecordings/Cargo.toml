@@ -1,0 +1,22 @@
+[package]
+name = "copyrecordings"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "main"
+crate-type = ["dylib"]
+
+[dependencies]
+gglibrary = { path = "../GGLibrary" }
+rand = "0.9.1"
+serde = { version = "1.0.219", features = ["derive"] }
+libc = "0.2.172"
+strum = "0.27.1"
+toml = "0.8.22"
+widestring = "1.2.0"
+minhook = "0.7.1"
+enum-map = { version = "2.7.3", features = ["serde"] }
+hex = "0.4.3"
+base64 = "0.22.1"
+flate2 = "1.1.2"
